@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>PackGuard AI - Sistem Bukti Packing & Banding Resi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Permissions-Policy" content="camera=*, microphone=*">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- SheetJS CDN (Parser Excel & CSV) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- ZXing Barcode Scanner CDN (Universal Reader) -->
+  <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header / Navbar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PackGuard AI</span>
+          <span class="brand-subtitle">Sistem Bukti Packing & Banding Resi</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" id="mainNav">
+        <button class="nav-btn active" onclick="switchTab('packing-tab', this)" id="btnTabPacking">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>Stasiun Packing</span>
+        </button>
+
+        <button class="nav-btn" onclick="switchTab('upload-tab', this)" id="btnTabUpload">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Upload Resi (Excel/CSV)</span>
+        </button>
+
+        <button class="nav-btn" onclick="switchTab('dashboard-tab', this)" id="btnTabDashboard">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          <span>Dashboard & Banding</span>
+        </button>
+
+        <button class="nav-btn" onclick="switchTab('system-tab', this)" id="btnTabSystem">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Pengaturan & Status</span>
+        </button>
+      </nav>
+
+      <!-- Header Quick Status & Petugas Info -->
+      <div class="header-badges">
+        <div id="packerHeaderBadge" class="packer-user-pill" style="display:none;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="packer-name" id="packerBadgeName">Petugas</span>
+          <button class="btn-logout-mini" onclick="logoutPacker()" title="Ganti Petugas / Logout">Logout</button>
+        </div>
+
+        <span class="badge badge-drive" title="Google Drive 5 TB">
+          <span class="badge-dot pulse-green"></span>
+          Drive 5 TB
+        </span>
+        <span class="badge badge-retention" title="Retensi 45 Hari">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Retensi 45 Hari
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+
+    <!-- ====================================================================
+         TAB 1: STASIUN PACKING (KAMERA & CHECKLIST)
+         ==================================================================== -->
+    <div id="packing-tab" class="tab-pane active">
+      <div class="packing-station-grid">
+        
+        <!-- Kolom Kiri: Kamera Viewfinder & Scanner -->
+        <div class="camera-card">
+          <div class="card-header-flex">
+            <h2 class="card-title">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              Kamera Meja Packing
+            </h2>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <select id="cameraSelect" class="camera-select" onchange="changeCameraDevice()">
+                <option value="">Pilih Kamera...</option>
+              </select>
+              <button class="btn btn-secondary" onclick="switchFacingMode()" title="Ganti Kamera Depan/Belakang" style="padding:0.5rem 0.75rem;">
+                🔄 Ganti
+              </button>
+            </div>
+          </div>
+
+          <!-- Viewfinder Frame -->
+          <div class="viewfinder-wrapper" id="viewfinderWrapper">
+            
+            <!-- OVERLAY IZIN KAMERA -->
+            <div id="cameraPermissionPrompt" class="camera-permission-overlay">
+              <div class="perm-icon-wrapper" id="permIconBox">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
+              <h3 id="permTitle" style="font-size:1.15rem; font-weight:800; margin-bottom:0.4rem;">Nyalakan Kamera Meja Packing</h3>
+              <p id="permDesc" style="font-size:0.83rem; color:var(--text-secondary); margin-bottom:1.25rem; max-width:340px; line-height:1.5;">
+                Klik tombol di bawah untuk mengaktifkan kamera bawaan Laptop, MacBook, HP Android, atau iPhone Anda.
+              </p>
+              <div style="display:flex; flex-direction:column; gap:0.5rem; width:100%; max-width:280px;">
+                <button class="btn btn-primary btn-lg" onclick="requestCameraAccess()" id="btnRequestCamera">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span>Izinkan & Nyalakan Kamera</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Indikator Rekaman (REC) -->
+            <div id="recIndicator" class="rec-indicator">
+              <span class="rec-dot"></span>
+              <span>REC <span id="recTimer">00:00</span></span>
+            </div>
+
+            <!-- Target Reticle Barcode -->
+            <div id="scannerGuide" class="scanner-guide">
+              <span>Arahkan Barcode / QR Code Resi</span>
+            </div>
+
+            <!-- Video Live Feed -->
+            <video id="webcamVideo" autoplay playsinline muted></video>
+
+            <!-- Autocut Visual Flash Feedback -->
+            <div id="autocutFlashOverlay" class="autocut-flash-overlay"></div>
+
+            <!-- Canvas Watermark (di balik layar untuk merekam) -->
+            <canvas id="watermarkCanvas"></canvas>
+
+            <!-- Watermark Overlay Preview (HANYA NO RESI & WAKTU WIB) -->
+            <div class="watermark-overlay" id="watermarkOverlay">
+              <span id="wmResiText">RESI: [BELUM SCAN]</span>
+              <span id="wmTimeText">--/--/---- --:--:-- WIB</span>
+            </div>
+          </div>
+
+          <!-- Camera Controls Bar -->
+          <div class="camera-controls-bar">
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+              <!-- Tombol Mode Packing Beruntun (Hands-Free) -->
+              <button class="btn btn-continuous" id="btnToggleContinuous" onclick="toggleContinuousPackingMode()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span id="continuousBtnText">Mulai Mode Beruntun (Hands-Free)</span>
+              </button>
+
+              <button class="btn btn-secondary" id="btnToggleScan" onclick="toggleBarcodeScanner()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                  <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                  <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                  <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                </svg>
+                <span id="scanBtnText">Scan Ulang Resi</span>
+              </button>
+
+              <span id="continuousBadge" class="continuous-status-badge" style="display:none;"></span>
+            </div>
+
+            <div style="font-size:0.75rem; color:var(--text-muted);">
+              Tekan <kbd style="background:#334155; padding:2px 6px; border-radius:4px; color:#fff;">Spasi</kbd> untuk Selesai
+            </div>
+          </div>
+
+          <!-- Manual Resi Input & Scanner Tips -->
+          <div class="search-resi-box">
+            <input type="text" id="manualResiInput" class="input-text" placeholder="Ketik No Resi manual jika barcode rusak / scan gun USB..." onkeydown="if(event.key==='Enter') searchResiManual()">
+            <button class="btn btn-primary" onclick="searchResiManual()">Cari</button>
+          </div>
+          <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.4rem; line-height:1.4;">
+            💡 <strong>Tips:</strong> Jika kamera laptop buram (karena fixed-focus), arahkan bagian <strong>QR Code</strong> pada resi, buka web di <strong>HP</strong> (autofocus makro), atau gunakan <strong>Barcode Scanner USB</strong>.
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Anti-Salah-Packing & Daftar Produk -->
+        <div class="checklist-card">
+          <div class="card-header-flex">
+            <h2 class="card-title">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              Anti-Salah-Packing (Checklist)
+            </h2>
+            <span id="packingStatusBadge" class="badge" style="background:#334155; color:#94a3b8;">Menunggu Scan</span>
+          </div>
+
+          <!-- Empty State -->
+          <div id="emptyChecklistState" class="empty-checklist-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="60" height="60" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+            <p style="font-weight:600; color:var(--text-primary); margin-bottom:0.25rem;">Belum Ada Resi Terpilih</p>
+            <p style="font-size:0.82rem;">Arahkan kertas resi ke kamera untuk menampilkan daftar barang yang harus dimasukkan.</p>
+          </div>
+
+          <!-- Active Order Container -->
+          <div id="activeOrderContainer" style="display: none;">
+            <div class="order-meta-box">
+              <div class="order-meta-row">
+                <span class="order-meta-label">No. Resi:</span>
+                <span id="activeResiText" class="order-meta-resi">-</span>
+              </div>
+              <div class="order-meta-row">
+                <span class="order-meta-label">Nama Pembeli:</span>
+                <span id="activeBuyerText" class="order-meta-value">-</span>
+              </div>
+              <div class="order-meta-row">
+                <span class="order-meta-label">Ekspedisi:</span>
+                <span id="activeCourierText" class="order-meta-value">-</span>
+              </div>
+            </div>
+
+            <p style="font-size:0.82rem; font-weight:700; color:var(--text-muted); margin-bottom:0.5rem; text-transform:uppercase;">
+              Daftar Barang Pesanan:
+            </p>
+
+            <div id="itemsChecklistList" class="items-checklist-list">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Action Controls -->
+            <div class="packing-actions-footer">
+              <button id="btnStartRecord" class="btn btn-primary btn-lg" onclick="startPackingRecording()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                <span>Mulai Rekam Packing</span>
+              </button>
+
+              <button id="btnStopRecord" class="btn btn-success btn-lg" onclick="stopPackingRecording()" style="display: none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="6" y="6" width="12" height="12"></rect>
+                </svg>
+                <span>Selesai & Unggah ke GDrive</span>
+              </button>
+
+              <button id="btnCancelPacking" class="btn btn-secondary" onclick="resetPackingState()" style="font-size:0.8rem;">
+                Batal / Ganti Resi
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         TAB 2: UPLOAD RESI (EXCEL / CSV)
+         ==================================================================== -->
+    <div id="upload-tab" class="tab-pane">
+      <div class="upload-container">
+        
+        <div class="dropzone" id="fileDropzone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelect(event)">
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" width="54" height="54" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+          </div>
+          <h3 class="dropzone-title">Upload File Data Resi (Excel / CSV)</h3>
+          <p class="dropzone-desc">Klik atau seret file export pesanan dari Shopee, Tokopedia, TikTok Shop, atau Lazada ke sini.</p>
+          <span class="badge badge-retention" style="padding:0.4rem 1rem;">Otomatis Disusun Rapi ke Sheet Baru</span>
+        </div>
+
+        <!-- Preview Upload Wrapper -->
+        <div id="uploadPreviewWrapper" class="preview-wrapper" style="display: none;">
+          <div class="card-header-flex">
+            <div>
+              <h3 style="font-size:1.1rem; font-weight:700;">Pratinjau Data Resi</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);" id="previewMetaText">-</p>
+            </div>
+            <div>
+              <input type="text" id="batchNameInput" class="input-text" placeholder="Nama Batch / Sheet Baru..." style="width:230px;">
+            </div>
+          </div>
+
+          <div class="preview-table-container">
+            <table class="data-table" id="previewTable">
+              <thead>
+                <tr>
+                  <th>No Resi</th>
+                  <th>Nama Pembeli</th>
+                  <th>Nama Produk</th>
+                  <th>Variasi (Warna/Ukuran)</th>
+                  <th>Qty</th>
+                  <th>Ekspedisi</th>
+                </tr>
+              </thead>
+              <tbody id="previewTableBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1rem;">
+            <button class="btn btn-secondary" onclick="cancelUpload()">Batal</button>
+            <button class="btn btn-primary" id="btnConfirmUpload" onclick="submitBatchUpload()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Simpan ke Google Sheet Baru</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         TAB 3: DASHBOARD ADMIN & BUKTI BANDING
+         ==================================================================== -->
+    <div id="dashboard-tab" class="tab-pane">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon total">📦</div>
+          <div>
+            <div class="stat-number" id="statTotalResi">0</div>
+            <div class="stat-label">Total Resi Terdata</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon selesai">✅</div>
+          <div>
+            <div class="stat-number" id="statTotalSelesai">0</div>
+            <div class="stat-label">Sudah Dipacking (Video Ada)</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon belum">⏳</div>
+          <div>
+            <div class="stat-number" id="statTotalBelum">0</div>
+            <div class="stat-label">Belum Dipacking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Card -->
+      <div class="dashboard-card">
+        <div class="table-filters">
+          <div style="display:flex; gap:0.5rem; flex:1; max-width:450px;">
+            <input type="text" id="dashboardSearch" class="input-text" placeholder="Cari no resi atau nama pembeli..." oninput="filterDashboardTable()">
+          </div>
+
+          <div style="display:flex; gap:0.5rem;">
+            <select id="statusFilter" class="camera-select" onchange="filterDashboardTable()">
+              <option value="ALL">Semua Status</option>
+              <option value="SELESAI">Sudah Selesai</option>
+              <option value="BELUM">Belum Selesai</option>
+            </select>
+            <button class="btn btn-secondary" onclick="loadDashboardData()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No Resi</th>
+                <th>Pembeli</th>
+                <th>Produk & Variasi</th>
+                <th>Ekspedisi</th>
+                <th>Status Packing</th>
+                <th>Waktu Packing</th>
+                <th>Petugas</th>
+                <th>Bukti Video</th>
+                <th>Aksi Banding</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardTableBody">
+              <tr>
+                <td colspan="9" style="text-align:center; padding:2rem; color:var(--text-muted);">Memuat data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         TAB 4: PENGATURAN & KONEKSI API GOOGLE APPS SCRIPT
+         ==================================================================== -->
+    <div id="system-tab" class="tab-pane">
+      <div class="upload-container">
+        <div class="dashboard-card">
+          <h2 class="card-title" style="margin-bottom:1rem;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Koneksi Google Apps Script (Drive 5 TB & Spreadsheet)
+          </h2>
+
+          <div style="background:rgba(2,132,199,0.1); border:1px solid rgba(2,132,199,0.3); border-radius:var(--radius-md); padding:1rem; font-size:0.85rem; line-height:1.6; margin-bottom:1.5rem;">
+            <strong>🔗 URL Web App Google Apps Script:</strong><br>
+            Tempelkan URL hasil deployment Google Apps Script Anda (format: <code>https://script.google.com/macros/s/.../exec</code>) ke dalam kotak di bawah ini agar web mandiri ini terhubung ke Google Drive dan Spreadsheet Anda.
+          </div>
+
+          <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+            <input type="text" id="gasApiUrlInput" class="input-text" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1; min-width:280px;">
+            <button class="btn btn-primary" onclick="saveApiUrlFromInput()">
+              Simpan & Hubungkan
+            </button>
+            <button class="btn btn-secondary" onclick="copyEmployeeWhatsAppLink()" title="Bagikan link ke WhatsApp karyawan toko agar HP mereka langsung otomatis terhubung">
+              📲 Salin Link WhatsApp Karyawan
+            </button>
+          </div>
+          <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:1.5rem; line-height:1.4;">
+            💡 <strong>Tips HP Karyawan:</strong> Setelah klik <em>Simpan & Hubungkan</em>, klik tombol <strong>Salin Link WhatsApp Karyawan</strong> dan kirim ke grup WA toko. Karyawan yang mengklik link tersebut di HP mereka akan <strong>langsung otomatis terhubung</strong> tanpa perlu setting apapun!
+          </div>
+
+          <div class="order-meta-box">
+            <div class="order-meta-row">
+              <span class="order-meta-label">Kapasitas Penyimpanan:</span>
+              <span class="order-meta-value" style="color:#34d399;">5 TB (Google Drive Terhubung)</span>
+            </div>
+            <div class="order-meta-row">
+              <span class="order-meta-label">Folder Induk Master:</span>
+              <span class="order-meta-value">
+                <a id="systemFolderLink" href="#" target="_blank" style="color:var(--accent-cyan); text-decoration:underline;">Belum Diperiksa</a>
+              </span>
+            </div>
+            <div class="order-meta-row">
+              <span class="order-meta-label">File Google Spreadsheet:</span>
+              <span class="order-meta-value">
+                <a id="systemSheetLink" href="#" target="_blank" style="color:var(--accent-cyan); text-decoration:underline;">Belum Diperiksa</a>
+              </span>
+            </div>
+            <div class="order-meta-row">
+              <span class="order-meta-label">Kebijakan Retensi Otomatis:</span>
+              <span class="order-meta-value" style="color:var(--accent-cyan);">45 Hari (Trigger Harian Aktif)</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
+            <button class="btn btn-secondary" onclick="checkSystemStatus()">Periksa Status Koneksi</button>
+            <button class="btn btn-danger" onclick="triggerManualCleanup()">Jalankan Pembersihan 45 Hari Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====================================================================
+       MODAL: GENERATOR FORMAT BANDING
+       ==================================================================== -->
+  <div id="disputeModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem; font-weight:800;">Draft Sanggahan Banding Retur</h3>
+        <button class="modal-close" onclick="closeDisputeModal()">&times;</button>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
+        Format sanggahan resmi yang siap disalin dan ditempel ke pusat resolusi Shopee, Tokopedia, atau TikTok Shop:
+      </p>
+
+      <textarea id="disputeTextContent" class="dispute-textarea" readonly></textarea>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button class="btn btn-secondary" onclick="closeDisputeModal()">Tutup</button>
+        <button class="btn btn-success" onclick="copyDisputeText()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span id="btnCopyText">Salin Teks Banding</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: OTENTIKASI & VERIFIKASI EMAIL OTP PETUGAS PACKING
+       ==================================================================== -->
+  <div id="packerModalBackdrop" class="packer-modal-backdrop" style="display:none;">
+    <div class="packer-card">
+      <div class="packer-card-icon">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+
+      <h2>Verifikasi Petugas Packing</h2>
+      <p>Masukkan identitas Anda dan verifikasi OTP email untuk membuka akses stasiun packing barang.</p>
+
+      <!-- Step 1: Input Nama & Email -->
+      <div id="packerStep1">
+        <div class="packer-form-group">
+          <label>Nama Lengkap Petugas</label>
+          <input type="text" id="packerNameInput" class="packer-input" placeholder="Contoh: Ahmad Fauzi" autocomplete="name">
+        </div>
+
+        <div class="packer-form-group">
+          <label>Email Petugas (Untuk OTP)</label>
+          <input type="email" id="packerEmailInput" class="packer-input" placeholder="nama@email.com" autocomplete="email">
+        </div>
+
+        <button class="btn btn-primary btn-lg" id="btnSendOtp" onclick="submitRequestOtp()" style="width:100%; margin-top:0.5rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          <span>Kirim Kode OTP</span>
+        </button>
+      </div>
+
+      <!-- Step 2: Input 6 Digit OTP -->
+      <div id="packerStep2" style="display:none;">
+        <p style="font-size:0.82rem; color:#38bdf8; margin-bottom:1rem;">
+          Kode 6 digit telah dikirim ke: <strong id="displayTargetEmail"></strong>
+        </p>
+
+        <div class="packer-form-group">
+          <label style="text-align:center;">Masukkan 6 Digit Kode OTP</label>
+          <input type="text" id="packerOtpInput" class="packer-input otp-box" maxlength="6" placeholder="000000" inputmode="numeric">
+        </div>
+
+        <button class="btn btn-success btn-lg" id="btnVerifyOtp" onclick="submitVerifyOtp()" style="width:100%; margin-top:0.5rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Verifikasi & Buka Meja Packing</span>
+        </button>
+
+        <div style="margin-top:1rem; display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-link" onclick="backToPackerStep1()" style="color:var(--text-muted); font-size:0.8rem; background:none; border:none; cursor:pointer;">
+            &larr; Ganti Email
+          </button>
+          <button class="btn-link" id="btnResendOtp" onclick="submitRequestOtp()" style="color:var(--accent-cyan); font-size:0.8rem; background:none; border:none; cursor:pointer;">
+            Kirim Ulang OTP
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
